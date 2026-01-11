@@ -2,7 +2,7 @@ let config = {
     parent: 'phaser-game',
     type: Phaser.CANVAS,
     render: {
-        pixelArt: true
+        pixelArt: false
     },
     fps: { forceSetTimeOut: true, target: 60 },
     physics: {
@@ -15,8 +15,8 @@ let config = {
             }
         }
     },   // ensure consistent timing across machines
-    width: 1650,
-    height: 900,
+    width: 800,
+    height: 800,
     scene: [prototype]
 }
 
