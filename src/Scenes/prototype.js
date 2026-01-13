@@ -24,7 +24,7 @@ class prototype extends Phaser.Scene {
             Width: 5,
             Height:20,
             Displace:80,
-            Lifetime:220,
+            Lifetime:320,
             sprite: this.physics.add.sprite(100,100,"AA1").setVisible(true).setImmovable(true).setScale(6),
         }
         this.hitboxAA1.sprite.setSize(this.hitboxAA1.Width,this.hitboxAA1.Height);
@@ -33,7 +33,7 @@ class prototype extends Phaser.Scene {
             Width: 14,
             Height:12,
             Displace:80,
-            Lifetime:220,
+            Lifetime:320,
             sprite: this.physics.add.sprite(100,100,"AA2").setVisible(true).setImmovable(true).setScale(6),
         }
         this.hitboxAA2.sprite.setSize(this.hitboxAA2.Width,this.hitboxAA2.Height);
@@ -42,7 +42,7 @@ class prototype extends Phaser.Scene {
             Width: 9,
             Height:9,
             Displace:100,
-            Lifetime:220,
+            Lifetime:320,
             sprite: this.physics.add.sprite(100,100,"AA3").setVisible(true).setImmovable(true).setScale(6),
         }
         this.hitboxAA3.sprite.setSize(this.hitboxAA3.Width,this.hitboxAA3.Height)
@@ -53,6 +53,12 @@ class prototype extends Phaser.Scene {
         };
         console.log(this.hitboxList)
 
+        this.attackChainList = [
+            this.hitboxAA1,
+            this.hitboxAA2,
+            this.hitboxAA3
+        ]
+
         this.left = this.input.keyboard.addKey("A");
         this.right = this.input.keyboard.addKey("D");
         this.up = this.input.keyboard.addKey("W");
@@ -60,9 +66,15 @@ class prototype extends Phaser.Scene {
         this.space = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         this.shift = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
 
+        this.AAcounter = 0;
+
         this.input.on('pointerdown', (pointer) => {
             if (pointer.leftButtonDown() && !this.paused) {
-                this.spawnAttackHitbox(pointer,this.hitboxList.AA3,this.heroObj.sprite);
+                this.spawnAttackHitbox(pointer,this.attackChainList[this.AAcounter],this.heroObj.sprite);
+                this.AAcounter++;
+                if(this.AAcounter >2){
+                    this.AAcounter = 0;
+                }
             }
         });
 
