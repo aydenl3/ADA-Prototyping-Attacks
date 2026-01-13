@@ -8,6 +8,7 @@ class prototype extends Phaser.Scene {
         this.load.image("hero","tomato.png")
         this.load.image("AA1","Auto1.png")
         this.load.image("AA2","Auto2.png")
+        this.load.image("AA3","Auto3.png")
     }
     create(){
         this.paused = false;
@@ -38,11 +39,11 @@ class prototype extends Phaser.Scene {
         this.hitboxAA2.sprite.setSize(this.hitboxAA2.Width,this.hitboxAA2.Height);
 
         this.hitboxAA3 = {
-            Width: 40,
-            Height:40,
-            Displace:60,
+            Width: 9,
+            Height:9,
+            Displace:100,
             Lifetime:220,
-            sprite: this.physics.add.sprite(100,100,null).setVisible(true).setImmovable(true),
+            sprite: this.physics.add.sprite(100,100,"AA3").setVisible(true).setImmovable(true).setScale(6),
         }
         this.hitboxAA3.sprite.setSize(this.hitboxAA3.Width,this.hitboxAA3.Height)
         this.hitboxList = {
@@ -61,7 +62,7 @@ class prototype extends Phaser.Scene {
 
         this.input.on('pointerdown', (pointer) => {
             if (pointer.leftButtonDown() && !this.paused) {
-                this.spawnAttackHitbox(pointer,this.hitboxList.AA2,this.heroObj.sprite);
+                this.spawnAttackHitbox(pointer,this.hitboxList.AA3,this.heroObj.sprite);
             }
         });
 
