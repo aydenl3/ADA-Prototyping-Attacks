@@ -7,6 +7,7 @@ class prototype extends Phaser.Scene {
         this.load.setPath("./assets/");
         this.load.image("hero","tomato.png")
         this.load.image("AA1","Auto1.png")
+        this.load.image("AA2","Auto2.png")
     }
     create(){
         this.paused = false;
@@ -18,23 +19,39 @@ class prototype extends Phaser.Scene {
 
         }
 
-        this.hitboxObj = {
-            AA1Width: 5,
-            AA1Height:20,
-            AA2Width: 120,
-            AA2Height:70,
-            AA3Width: 40,
-            AA3Height:40,
-            spriteAA1: this.physics.add.sprite(100,100,"AA1").setVisible(true).setImmovable(true),
-            spriteAA2: this.physics.add.sprite(100,100,null).setVisible(true).setImmovable(true),
-            spriteAA3: this.physics.add.sprite(100,100,null).setVisible(true).setImmovable(true),
+        this.hitboxAA1 = {
+            Width: 5,
+            Height:20,
+            Displace:80,
+            Lifetime:220,
+            sprite: this.physics.add.sprite(100,100,"AA1").setVisible(true).setImmovable(true).setScale(6),
         }
-        this.hitboxObj.spriteAA1.setScale(6);
-        this.hitboxObj.spriteAA1.setSize(this.hitboxObj.AA1Width,this.hitboxObj.AA1Height)
-        this.hitboxObj.spriteAA2.setSize(this.hitboxObj.AA2Width,this.hitboxObj.AA2Height)
-        this.hitboxObj.spriteAA3.setSize(this.hitboxObj.AA3Width,this.hitboxObj.AA3Height)
+        this.hitboxAA1.sprite.setSize(this.hitboxAA1.Width,this.hitboxAA1.Height);
 
-        console.log(this.hitboxObj.AA1Width);
+        this.hitboxAA2 = {
+            Width: 14,
+            Height:12,
+            Displace:80,
+            Lifetime:220,
+            sprite: this.physics.add.sprite(100,100,"AA2").setVisible(true).setImmovable(true).setScale(6),
+        }
+        this.hitboxAA2.sprite.setSize(this.hitboxAA2.Width,this.hitboxAA2.Height);
+
+        this.hitboxAA3 = {
+            Width: 40,
+            Height:40,
+            Displace:60,
+            Lifetime:220,
+            sprite: this.physics.add.sprite(100,100,null).setVisible(true).setImmovable(true),
+        }
+        this.hitboxAA3.sprite.setSize(this.hitboxAA3.Width,this.hitboxAA3.Height)
+        this.hitboxList = {
+            AA1: this.hitboxAA1,
+            AA2: this.hitboxAA2,
+            AA3: this.hitboxAA3
+        };
+        console.log(this.hitboxList)
+
         this.left = this.input.keyboard.addKey("A");
         this.right = this.input.keyboard.addKey("D");
         this.up = this.input.keyboard.addKey("W");
@@ -43,8 +60,8 @@ class prototype extends Phaser.Scene {
         this.shift = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
 
         this.input.on('pointerdown', (pointer) => {
-            if (pointer.leftButtonDown()) {
-                this.spawnAttackHitbox(pointer,this.hitboxObj.spriteAA1,this.heroObj.sprite);
+            if (pointer.leftButtonDown() && !this.paused) {
+                this.spawnAttackHitbox(pointer,this.hitboxList.AA2,this.heroObj.sprite);
             }
         });
 
@@ -103,7 +120,9 @@ movementLogic() {
 }
 
 
-spawnAttackHitbox(pointer, hitbox, player) {
+spawnAttackHitbox(pointer, hitboxdata, player) {
+    console.log(hitboxdata.Width)
+    let hitbox = hitboxdata.sprite
     // World-space mouse position
         this.paused = true;
          player.body.setVelocity(0, 0);
@@ -120,28 +139,28 @@ spawnAttackHitbox(pointer, hitbox, player) {
     dirX /= length;
     dirY /= length;
 
-    const range = 60;       // distance from player
+    //const range = 60;       // distance from player
     const lifetime = 220;  // ms
 
     // Position hitbox forward from player
     hitbox.setPosition(
-        player.x + dirX * range,
-        player.y + dirY * range
+        player.x + dirX * hitboxdata.Displace,
+        player.y + dirY * hitboxdata.Displace
     );
     // Swap hitbox dimensions based on attack direction
     if (Math.abs(dirX) > Math.abs(dirY)) {
         // Horizontal attack
         hitbox.body.setSize(
-            this.hitboxObj.AA1Height,
-            this.hitboxObj.AA1Width,
+            hitboxdata.Height,
+            hitboxdata.Width,
             true
         );
         //hitbox.rotation = 0;
     } else {
         // Vertical attack
         hitbox.body.setSize(
-            this.hitboxObj.AA1Width,
-            this.hitboxObj.AA1Height,
+            hitboxdata.Width,
+            hitboxdata.Height,
             true
         );
         //hitbox.rotation = 90;
@@ -153,7 +172,7 @@ spawnAttackHitbox(pointer, hitbox, player) {
     hitbox.rotation = Math.atan2(dirY, dirX);
 
     // Disable after attack window
-    this.time.delayedCall(lifetime, () => {
+    this.time.delayedCall(hitboxdata.Lifetime, () => {
         hitbox.setActive(false);
         hitbox.setVisible(false);
         this.paused = false;
