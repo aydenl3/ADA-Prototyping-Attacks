@@ -9,6 +9,7 @@ class prototype extends Phaser.Scene {
         this.load.image("AA1","Auto1.png")
     }
     create(){
+        this.paused = false;
         this.heroObj = {
             sprite: this.physics.add.sprite(game.config.width / 2,game.config.height / 2,"hero").setScale(0.2),
             accelX: 150,
@@ -18,16 +19,17 @@ class prototype extends Phaser.Scene {
         }
 
         this.hitboxObj = {
-            AA1Width: 40,
-            AA1Height:120,
+            AA1Width: 5,
+            AA1Height:20,
             AA2Width: 120,
             AA2Height:70,
             AA3Width: 40,
             AA3Height:40,
-            spriteAA1: this.physics.add.sprite(100,100,null).setVisible(true).setImmovable(true),
+            spriteAA1: this.physics.add.sprite(100,100,"AA1").setVisible(true).setImmovable(true),
             spriteAA2: this.physics.add.sprite(100,100,null).setVisible(true).setImmovable(true),
             spriteAA3: this.physics.add.sprite(100,100,null).setVisible(true).setImmovable(true),
         }
+        this.hitboxObj.spriteAA1.setScale(6);
         this.hitboxObj.spriteAA1.setSize(this.hitboxObj.AA1Width,this.hitboxObj.AA1Height)
         this.hitboxObj.spriteAA2.setSize(this.hitboxObj.AA2Width,this.hitboxObj.AA2Height)
         this.hitboxObj.spriteAA3.setSize(this.hitboxObj.AA3Width,this.hitboxObj.AA3Height)
@@ -103,6 +105,8 @@ movementLogic() {
 
 spawnAttackHitbox(pointer, hitbox, player) {
     // World-space mouse position
+        this.paused = true;
+         player.body.setVelocity(0, 0);
     const mouseX = pointer.worldX;
     const mouseY = pointer.worldY;
 
@@ -117,7 +121,7 @@ spawnAttackHitbox(pointer, hitbox, player) {
     dirY /= length;
 
     const range = 60;       // distance from player
-    const lifetime = 120;  // ms
+    const lifetime = 220;  // ms
 
     // Position hitbox forward from player
     hitbox.setPosition(
@@ -132,6 +136,7 @@ spawnAttackHitbox(pointer, hitbox, player) {
             this.hitboxObj.AA1Width,
             true
         );
+        //hitbox.rotation = 0;
     } else {
         // Vertical attack
         hitbox.body.setSize(
@@ -139,16 +144,19 @@ spawnAttackHitbox(pointer, hitbox, player) {
             this.hitboxObj.AA1Height,
             true
         );
+        //hitbox.rotation = 90;
     }
 
     // Enable hitbox
     hitbox.setActive(true);
     hitbox.setVisible(true);
+    hitbox.rotation = Math.atan2(dirY, dirX);
 
     // Disable after attack window
     this.time.delayedCall(lifetime, () => {
         hitbox.setActive(false);
         hitbox.setVisible(false);
+        this.paused = false;
     });
 }
 
