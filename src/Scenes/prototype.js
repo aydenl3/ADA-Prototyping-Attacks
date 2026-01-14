@@ -18,14 +18,34 @@ class prototype extends Phaser.Scene {
             accelY:150,
             shiftmode: ""
         }
+        //----------------------------------------------------------------------------------
+        this.hitboxCA1 = {
+            Width: 5,
+            Height:5,
+            Displace:120,
+            Lifetime:320,
+            sprite: this.physics.add.sprite(100,100,null).setVisible(true).setImmovable(true).setScale(6),
+        }
+        this.hitboxCA1.sprite.setSize(this.hitboxCA1.Width,this.hitboxCA1.Height);
+
         this.hitboxAA1 = {
             Width: 5,
             Height:20,
             Displace:80,
             Lifetime:320,
             sprite: this.physics.add.sprite(100,100,"AA1").setVisible(true).setImmovable(true).setScale(6),
+            Crit:this.hitboxCA1
         }
         this.hitboxAA1.sprite.setSize(this.hitboxAA1.Width,this.hitboxAA1.Height);
+       
+        this.hitboxCA2 = {
+            Width: 14,
+            Height:5,
+            Displace:100,
+            Lifetime:320,
+            sprite: this.physics.add.sprite(100,100,null).setVisible(true).setImmovable(true).setScale(6),
+        }
+        this.hitboxCA2.sprite.setSize(this.hitboxCA2.Width,this.hitboxCA2.Height);
 
         this.hitboxAA2 = {
             Width: 14,
@@ -33,6 +53,7 @@ class prototype extends Phaser.Scene {
             Displace:80,
             Lifetime:320,
             sprite: this.physics.add.sprite(100,100,"AA2").setVisible(true).setImmovable(true).setScale(6),
+            Crit:this.hitboxCA2
         }
         this.hitboxAA2.sprite.setSize(this.hitboxAA2.Width,this.hitboxAA2.Height);
 
@@ -44,12 +65,14 @@ class prototype extends Phaser.Scene {
             sprite: this.physics.add.sprite(100,100,"AA3").setVisible(true).setImmovable(true).setScale(6),
         }
         this.hitboxAA3.sprite.setSize(this.hitboxAA3.Width,this.hitboxAA3.Height)
-        this.hitboxList = {
-            AA1: this.hitboxAA1,
-            AA2: this.hitboxAA2,
-            AA3: this.hitboxAA3
-        };
-        console.log(this.hitboxList)
+        //----------------------------------------------------------------------------------------------
+        this.hitboxList = [
+            this.hitboxAA1,
+            this.hitboxAA2,
+            this.hitboxAA3,
+            this.hitboxCA1,
+            this.hitboxCA2
+        ];
 
         this.attackChainList = [
             this.hitboxAA1,
@@ -69,7 +92,7 @@ class prototype extends Phaser.Scene {
         this.AAcooldownCntr = 40;
         this.input.on('pointerdown', (pointer) => {
             if (pointer.leftButtonDown() && !this.paused && this.AAcooldown <= 0) {
-                if(this.AAcooldown <= -60){
+                if(this.AAcooldown <= -40){
                     this.AAcounter = 0;
                 }
                 this.spawnAttackHitbox(pointer,this.attackChainList[this.AAcounter],this.heroObj.sprite);
@@ -141,6 +164,10 @@ movementLogic() {
 
 
 spawnAttackHitbox(pointer, hitboxdata, player) {
+    console.log(hitboxdata.Crit)
+    if(hitboxdata.Crit != null){
+        this.spawnAttackHitbox(pointer,hitboxdata.Crit,player);
+    }
     console.log(hitboxdata.Width)
     let hitbox = hitboxdata.sprite
     // World-space mouse position
