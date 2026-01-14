@@ -17,9 +17,7 @@ class prototype extends Phaser.Scene {
             accelX: 150,
             accelY:150,
             shiftmode: ""
-
         }
-
         this.hitboxAA1 = {
             Width: 5,
             Height:20,
@@ -67,23 +65,32 @@ class prototype extends Phaser.Scene {
         this.shift = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
 
         this.AAcounter = 0;
-
+        this.AAcooldown = 0;
+        this.AAcooldownCntr = 40;
         this.input.on('pointerdown', (pointer) => {
-            if (pointer.leftButtonDown() && !this.paused) {
+            if (pointer.leftButtonDown() && !this.paused && this.AAcooldown <= 0) {
+                if(this.AAcooldown <= -60){
+                    this.AAcounter = 0;
+                }
                 this.spawnAttackHitbox(pointer,this.attackChainList[this.AAcounter],this.heroObj.sprite);
                 this.AAcounter++;
                 if(this.AAcounter >2){
                     this.AAcounter = 0;
                 }
+                this.AAcooldown = this.AAcooldownCntr;
             }
         });
 
     }
     update(){
         this.movementLogic();
+        this.decrementCounters();
     }
 
 
+decrementCounters(){
+    this.AAcooldown -=1;
+}
 
 movementLogic() {
     if (this.paused) return;
@@ -152,9 +159,6 @@ spawnAttackHitbox(pointer, hitboxdata, player) {
     dirX /= length;
     dirY /= length;
 
-    //const range = 60;       // distance from player
-    const lifetime = 220;  // ms
-
     // Position hitbox forward from player
     hitbox.setPosition(
         player.x + dirX * hitboxdata.Displace,
@@ -168,7 +172,6 @@ spawnAttackHitbox(pointer, hitboxdata, player) {
             hitboxdata.Width,
             true
         );
-        //hitbox.rotation = 0;
     } else {
         // Vertical attack
         hitbox.body.setSize(
@@ -176,7 +179,6 @@ spawnAttackHitbox(pointer, hitboxdata, player) {
             hitboxdata.Height,
             true
         );
-        //hitbox.rotation = 90;
     }
 
     // Enable hitbox
