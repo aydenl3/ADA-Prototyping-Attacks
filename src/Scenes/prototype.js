@@ -6,6 +6,7 @@ class prototype extends Phaser.Scene {
     preload(){
         this.load.setPath("./assets/");
         this.load.image("hero","tomato.png")
+        this.load.image("dummy","crabby.png")
         this.load.image("AA1","Auto1.png")
         this.load.image("AA2","Auto2.png")
         this.load.image("AA3","Auto3.png")
@@ -18,7 +19,16 @@ class prototype extends Phaser.Scene {
             accelY:150,
             shiftmode: ""
         }
-        //----------------------------------------------------------------------------------
+
+        this.dummyObj = {
+            sprite: this.physics.add.sprite(game.config.width / 2,game.config.height / 2,"dummy").setScale(0.1),
+            accelX: 150,
+            accelY:150,
+            shiftmode: ""
+        }
+
+
+//HITBOXES// ----------------------------------------------------------------------------------
         this.hitboxCA1 = {
             Width: 5,
             Height:5,
@@ -65,28 +75,35 @@ class prototype extends Phaser.Scene {
             sprite: this.physics.add.sprite(100,100,"AA3").setVisible(true).setImmovable(true).setScale(6),
         }
         this.hitboxAA3.sprite.setSize(this.hitboxAA3.Width,this.hitboxAA3.Height)
+
+
+
+        this.hitboxList = this.physics.add.group({
+            allowGravity: false,
+            immovable: true
+        });
+        this.hitboxList.add(this.hitboxAA1.sprite);
+        this.hitboxList.add(this.hitboxCA1.sprite);
+        this.hitboxList.add(this.hitboxAA2.sprite);
+        this.hitboxList.add(this.hitboxCA2.sprite);
+        this.hitboxList.add(this.hitboxAA3.sprite);
+        
         //----------------------------------------------------------------------------------------------
-        this.hitboxList = [
-            this.hitboxAA1,
-            this.hitboxAA2,
-            this.hitboxAA3,
-            this.hitboxCA1,
-            this.hitboxCA2
-        ];
 
-        this.attackChainList = [
-            this.hitboxAA1,
-            this.hitboxAA2,
-            this.hitboxAA3
-        ]
 
+//INPUT KEYS//
         this.left = this.input.keyboard.addKey("A");
         this.right = this.input.keyboard.addKey("D");
         this.up = this.input.keyboard.addKey("W");
         this.down = this.input.keyboard.addKey("S");
         this.space = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         this.shift = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
-
+//AUTO ATTACK//
+        this.attackChainList = [
+            this.hitboxAA1,
+            this.hitboxAA2,
+            this.hitboxAA3
+        ]
         this.AAcounter = 0;
         this.AAcooldown = 0;
         this.AAcooldownCntr = 40;
@@ -102,6 +119,15 @@ class prototype extends Phaser.Scene {
                 }
                 this.AAcooldown = this.AAcooldownCntr;
             }
+//COLLISION//
+        this.physics.add.overlap(
+            this.hitboxList,
+            this.dummyObj.sprite,
+            (hitbox, enemy) => {
+                this.dealDamage(hitbox,enemy);
+            }
+        );
+
         });
 
     }
@@ -110,10 +136,16 @@ class prototype extends Phaser.Scene {
         this.decrementCounters();
     }
 
+dealDamage(hitbox,enemy){
+ if(hitbox.active){
+    console.log("POW")
+ }   
 
+}
 decrementCounters(){
     this.AAcooldown -=1;
 }
+
 
 movementLogic() {
     if (this.paused) return;
@@ -217,6 +249,8 @@ spawnAttackHitbox(pointer, hitboxdata, player) {
     this.time.delayedCall(hitboxdata.Lifetime, () => {
         hitbox.setActive(false);
         hitbox.setVisible(false);
+        hitbox.x = 0;
+        hitbox.y = 0;
         this.paused = false;
     });
 }
