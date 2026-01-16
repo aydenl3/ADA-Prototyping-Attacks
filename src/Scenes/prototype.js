@@ -41,7 +41,7 @@ class prototype extends Phaser.Scene {
             accelY:150,
             shiftmode: ""
         }
-        this.dummyObj.sprite.setDrag(800, 800);
+        this.dummyObj.sprite.setDrag(600, 600);
         //this.dummyObj.sprite.setMaxVelocity(200, 200);
 
 
@@ -137,8 +137,8 @@ class prototype extends Phaser.Scene {
                     this.AAcounter = 0;
                 }
                 this.spawnAttackHitbox(pointer,this.attackChainList[this.AAcounter],this.heroObj.sprite);
-                this.AAcounter++;
-                if(this.AAcounter >2){
+                //this.AAcounter++;
+                if(this.AAcounter >=2){
                     this.AAcounter = 0;
                 }
                 this.AAcooldown = this.AAcooldownCntr;
@@ -151,35 +151,35 @@ class prototype extends Phaser.Scene {
             this.hitboxAA1.sprite,
             this.dummyObj.sprite,
             (hitbox, enemy) => {
-                this.dealDamage(hitbox,enemy,this.hitboxAA1.Damage);
+                this.dealDamage(hitbox,enemy,this.hitboxAA1.Damage,false);
             }
         );
         this.physics.add.overlap(
             this.hitboxCA1.sprite,
             this.dummyObj.sprite,
             (hitbox, enemy) => {
-                this.dealDamage(hitbox,enemy,this.hitboxCA1.Damage);
+                this.dealDamage(hitbox,enemy,this.hitboxCA1.Damage,true);
             }
         );
         this.physics.add.overlap(
             this.hitboxAA2.sprite,
             this.dummyObj.sprite,
             (hitbox, enemy) => {
-                this.dealDamage(hitbox,enemy,this.hitboxAA2.Damage);
+                this.dealDamage(hitbox,enemy,this.hitboxAA2.Damage,false);
             }
         );
         this.physics.add.overlap(
             this.hitboxCA2.sprite,
             this.dummyObj.sprite,
             (hitbox, enemy) => {
-                this.dealDamage(hitbox,enemy,this.hitboxCA2.Damage);
+                this.dealDamage(hitbox,enemy,this.hitboxCA2.Damage,true);
             }
         );
         this.physics.add.overlap(
             this.hitboxAA3.sprite,
             this.dummyObj.sprite,
             (hitbox, enemy) => {
-                this.dealDamage(hitbox,enemy,this.hitboxAA3.Damage);
+                this.dealDamage(hitbox,enemy,this.hitboxAA3.Damage,false);
             }
         );
         this.physics.add.collider(this.heroObj.sprite, this.dummyObj.sprite);
@@ -189,10 +189,13 @@ update(){
     this.decrementCounters();
 }
 
-dealDamage(hitbox, enemy,damage) {
+dealDamage(hitbox, enemy,damage,crit) {
     if (!hitbox.body.enable) return;
     hitbox.body.enable = false;
     console.log('Damage:', damage);
+    if(crit){
+        this.AAcounter++;
+    }
 }
 
 
