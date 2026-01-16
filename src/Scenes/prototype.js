@@ -36,11 +36,14 @@ class prototype extends Phaser.Scene {
         }
 
         this.dummyObj = {
-            sprite: this.physics.add.sprite(game.config.width / 2,game.config.height / 2,"dummy").setScale(0.1),
+            sprite: this.physics.add.sprite(game.config.width / 2,game.config.height / 2,"dummy").setScale(0.05),
             accelX: 150,
             accelY:150,
             shiftmode: ""
         }
+        this.dummyObj.sprite.setDrag(800, 800);
+        //this.dummyObj.sprite.setMaxVelocity(200, 200);
+
 
 
 //HITBOXES// ----------------------------------------------------------------------------------
@@ -179,6 +182,7 @@ class prototype extends Phaser.Scene {
                 this.dealDamage(hitbox,enemy,this.hitboxAA3.Damage);
             }
         );
+        this.physics.add.collider(this.heroObj.sprite, this.dummyObj.sprite);
     }
 update(){
     this.movementLogic();
