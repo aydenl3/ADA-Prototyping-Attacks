@@ -10,14 +10,29 @@ class prototype extends Phaser.Scene {
         this.load.image("AA1","Auto1.png")
         this.load.image("AA2","Auto2.png")
         this.load.image("AA3","Auto3.png")
+        
     }
     create(){
+        this.textures.generate('blank', {
+            data: ['.'],
+            pixelWidth: 1,
+            pixelHeight: 1
+        });
+
         this.paused = false;
         this.heroObj = {
             sprite: this.physics.add.sprite(game.config.width / 2,game.config.height / 2,"hero").setScale(0.2),
             accelX: 150,
             accelY:150,
-            shiftmode: ""
+                // DASH
+            dashSpeed: 600,
+            dashDuration: 120,     // ms
+            dashCooldown: 400,     // ms
+            isDashing: false,
+            canDash: true,
+
+    lastMoveX: 1,
+    lastMoveY: 0
         }
 
         this.dummyObj = {
@@ -35,7 +50,7 @@ class prototype extends Phaser.Scene {
             Displace:120,
             Lifetime:320,
             Damage: 10,
-            sprite: this.physics.add.sprite(100,100,null).setVisible(true).setImmovable(true).setScale(6),
+            sprite: this.physics.add.sprite(100,100,"blank").setVisible(true).setImmovable(true).setScale(6),
         }
         this.hitboxCA1.sprite.setSize(this.hitboxCA1.Width,this.hitboxCA1.Height);
 
@@ -56,7 +71,7 @@ class prototype extends Phaser.Scene {
             Displace:100,
             Lifetime:320,
             Damage: 10,
-            sprite: this.physics.add.sprite(100,100,null).setVisible(true).setImmovable(true).setScale(6),
+            sprite: this.physics.add.sprite(100,100,"blank").setVisible(true).setImmovable(true).setScale(6),
         }
         this.hitboxCA2.sprite.setSize(this.hitboxCA2.Width,this.hitboxCA2.Height);
 
@@ -101,6 +116,7 @@ class prototype extends Phaser.Scene {
         this.right = this.input.keyboard.addKey("D");
         this.up = this.input.keyboard.addKey("W");
         this.down = this.input.keyboard.addKey("S");
+        this.Q = this.input.keyboard.addKey("Q");
         this.space = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         this.shift = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
 //AUTO ATTACK//
@@ -113,7 +129,7 @@ class prototype extends Phaser.Scene {
         this.AAcooldown = 0;
         this.AAcooldownCntr = 40;
         this.input.on('pointerdown', (pointer) => {
-            if (pointer.leftButtonDown() && !this.paused && this.AAcooldown <= 0) {
+            if (pointer.leftButtonDown() && !this.paused && !this.heroObj.isDashing && this.AAcooldown <= 0) {
                 if(this.AAcooldown <= -40){
                     this.AAcounter = 0;
                 }
@@ -171,6 +187,7 @@ update(){
 
 dealDamage(hitbox, enemy,damage) {
     if (!hitbox.body.enable) return;
+    hitbox.body.enable = false;
     console.log('Damage:', damage);
 }
 
@@ -181,6 +198,7 @@ decrementCounters(){
 
 
 movementLogic() {
+    if (this.heroObj.isDashing) return;
     if (this.paused) return;
 
     const body = this.heroObj.sprite.body;
@@ -195,6 +213,8 @@ movementLogic() {
 
     // ----- NORMALIZE (prevents diagonal speed boost) -----
     if (moveX !== 0 || moveY !== 0) {
+        this.heroObj.lastMoveX = moveX;
+        this.heroObj.lastMoveY = moveY;
         const length = Math.hypot(moveX, moveY);
         moveX /= length;
         moveY /= length;
@@ -202,9 +222,13 @@ movementLogic() {
 
     // ----- DASH -----
     let speed = this.heroObj.accelX;
-
-    if (this.shift.isDown && this.heroObj.shiftmode === "dash") {
-        speed = this.heroObj.dashSpeed;
+    if (
+        Phaser.Input.Keyboard.JustDown(this.shift) &&
+        this.heroObj.canDash &&
+        !this.paused
+    ) {
+    this.startDash();
+    return;
     }
 
     // ----- APPLY VELOCITY -----
@@ -225,6 +249,32 @@ movementLogic() {
             this.heroObj.sprite.play('idle', true);
         }
     }
+}
+
+startDash() {
+    const body = this.heroObj.sprite.body;
+
+    this.heroObj.isDashing = true;
+    this.heroObj.canDash = false;
+
+    const dx = this.heroObj.lastMoveX;
+    const dy = this.heroObj.lastMoveY;
+
+    body.setVelocity(
+        dx * this.heroObj.dashSpeed,
+        dy * this.heroObj.dashSpeed
+    );
+
+    // End dash
+    this.time.delayedCall(this.heroObj.dashDuration, () => {
+        this.heroObj.isDashing = false;
+        body.setVelocity(0, 0);
+    });
+
+    // Cooldown
+    this.time.delayedCall(this.heroObj.dashCooldown, () => {
+        this.heroObj.canDash = true;
+    });
 }
 
 
@@ -278,11 +328,13 @@ spawnAttackHitbox(pointer, hitboxdata, player) {
     hitbox.setVisible(true);
     hitbox.rotation = Math.atan2(dirY, dirX);
 
+    this.time.delayedCall(hitboxdata.Lifetime/2, () => {
+        this.paused = false;
+    });
     // Disable after attack window
     this.time.delayedCall(hitboxdata.Lifetime, () => {
         hitbox.body.enable = false;
         hitbox.setVisible(false);
-        this.paused = false;
     });
 }
 
