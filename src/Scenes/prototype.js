@@ -34,6 +34,7 @@ class prototype extends Phaser.Scene {
             Height:5,
             Displace:120,
             Lifetime:320,
+            Damage: 10,
             sprite: this.physics.add.sprite(100,100,null).setVisible(true).setImmovable(true).setScale(6),
         }
         this.hitboxCA1.sprite.setSize(this.hitboxCA1.Width,this.hitboxCA1.Height);
@@ -43,16 +44,18 @@ class prototype extends Phaser.Scene {
             Height:20,
             Displace:80,
             Lifetime:320,
+            Damage: 4,
             sprite: this.physics.add.sprite(100,100,"AA1").setVisible(true).setImmovable(true).setScale(6),
             Crit:this.hitboxCA1
         }
         this.hitboxAA1.sprite.setSize(this.hitboxAA1.Width,this.hitboxAA1.Height);
-       
+
         this.hitboxCA2 = {
             Width: 14,
             Height:5,
             Displace:100,
             Lifetime:320,
+            Damage: 10,
             sprite: this.physics.add.sprite(100,100,null).setVisible(true).setImmovable(true).setScale(6),
         }
         this.hitboxCA2.sprite.setSize(this.hitboxCA2.Width,this.hitboxCA2.Height);
@@ -62,6 +65,7 @@ class prototype extends Phaser.Scene {
             Height:12,
             Displace:80,
             Lifetime:320,
+            Damage: 4,
             sprite: this.physics.add.sprite(100,100,"AA2").setVisible(true).setImmovable(true).setScale(6),
             Crit:this.hitboxCA2
         }
@@ -72,6 +76,7 @@ class prototype extends Phaser.Scene {
             Height:9,
             Displace:100,
             Lifetime:320,
+            Damage: 4,
             sprite: this.physics.add.sprite(100,100,"AA3").setVisible(true).setImmovable(true).setScale(6),
         }
         this.hitboxAA3.sprite.setSize(this.hitboxAA3.Width,this.hitboxAA3.Height)
@@ -87,7 +92,7 @@ class prototype extends Phaser.Scene {
         this.hitboxList.add(this.hitboxAA2.sprite);
         this.hitboxList.add(this.hitboxCA2.sprite);
         this.hitboxList.add(this.hitboxAA3.sprite);
-        
+        console.log(this.hitboxList)
         //----------------------------------------------------------------------------------------------
 
 
@@ -119,29 +124,57 @@ class prototype extends Phaser.Scene {
                 }
                 this.AAcooldown = this.AAcooldownCntr;
             }
-//COLLISION//
-        this.physics.add.overlap(
-            this.hitboxList,
-            this.dummyObj.sprite,
-            (hitbox, enemy) => {
-                this.dealDamage(hitbox,enemy);
-            }
-        );
+
 
         });
-
+//COLLISION//
+        this.physics.add.overlap(
+            this.hitboxAA1.sprite,
+            this.dummyObj.sprite,
+            (hitbox, enemy) => {
+                this.dealDamage(hitbox,enemy,this.hitboxAA1.Damage);
+            }
+        );
+        this.physics.add.overlap(
+            this.hitboxCA1.sprite,
+            this.dummyObj.sprite,
+            (hitbox, enemy) => {
+                this.dealDamage(hitbox,enemy,this.hitboxCA1.Damage);
+            }
+        );
+        this.physics.add.overlap(
+            this.hitboxAA2.sprite,
+            this.dummyObj.sprite,
+            (hitbox, enemy) => {
+                this.dealDamage(hitbox,enemy,this.hitboxAA2.Damage);
+            }
+        );
+        this.physics.add.overlap(
+            this.hitboxCA2.sprite,
+            this.dummyObj.sprite,
+            (hitbox, enemy) => {
+                this.dealDamage(hitbox,enemy,this.hitboxCA2.Damage);
+            }
+        );
+        this.physics.add.overlap(
+            this.hitboxAA3.sprite,
+            this.dummyObj.sprite,
+            (hitbox, enemy) => {
+                this.dealDamage(hitbox,enemy,this.hitboxAA3.Damage);
+            }
+        );
     }
-    update(){
-        this.movementLogic();
-        this.decrementCounters();
-    }
-
-dealDamage(hitbox,enemy){
- if(hitbox.active){
-    console.log("POW")
- }   
-
+update(){
+    this.movementLogic();
+    this.decrementCounters();
 }
+
+dealDamage(hitbox, enemy,damage) {
+    if (!hitbox.body.enable) return;
+    console.log('Damage:', damage);
+}
+
+
 decrementCounters(){
     this.AAcooldown -=1;
 }
@@ -196,11 +229,11 @@ movementLogic() {
 
 
 spawnAttackHitbox(pointer, hitboxdata, player) {
-    console.log(hitboxdata.Crit)
+    //console.log(hitboxdata.Crit)
     if(hitboxdata.Crit != null){
         this.spawnAttackHitbox(pointer,hitboxdata.Crit,player);
     }
-    console.log(hitboxdata.Width)
+    //console.log(hitboxdata.Width)
     let hitbox = hitboxdata.sprite
     // World-space mouse position
         this.paused = true;
@@ -241,16 +274,14 @@ spawnAttackHitbox(pointer, hitboxdata, player) {
     }
 
     // Enable hitbox
-    hitbox.setActive(true);
+    hitbox.body.enable = true;
     hitbox.setVisible(true);
     hitbox.rotation = Math.atan2(dirY, dirX);
 
     // Disable after attack window
     this.time.delayedCall(hitboxdata.Lifetime, () => {
-        hitbox.setActive(false);
+        hitbox.body.enable = false;
         hitbox.setVisible(false);
-        hitbox.x = 0;
-        hitbox.y = 0;
         this.paused = false;
     });
 }
